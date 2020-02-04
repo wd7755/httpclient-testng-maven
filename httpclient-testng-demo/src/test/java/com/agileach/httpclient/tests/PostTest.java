@@ -25,7 +25,7 @@ public class PostTest extends TestAPI {
 		em = new ExecuteMethod();
 	}
 
-	@Test
+	@Test(enabled = false)
 	public void testPost() throws Exception {
 		List<NameValuePair> params = new ArrayList<NameValuePair>();
 		params.add(new BasicNameValuePair("apiKey", "IXuEAVG761353c0c8b926afff752c048fcaab888c9827e4"));
@@ -82,7 +82,7 @@ public class PostTest extends TestAPI {
 		Assert.assertEquals(expectedResult, city);
 	}
 
-	@Test(dataProvider = "testData")
+	@Test(dataProvider = "testData", enabled = false)
 	public void testPhoneMember(String testname, String method, String address, String checkpoint,
 			String expectedResult, String status, String keyvalue) throws Exception {
 		doPost(testname, method, address, checkpoint, expectedResult, status, keyvalue);

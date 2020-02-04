@@ -1,4 +1,4 @@
-package com.agileach.httpclient.tests;
+package com.agileach.httpclient.util;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -17,7 +17,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.alibaba.fastjson.JSONObject;
 
-public class ExecuteMethodTest {
+public class HttpClientUtil {
 	/**
 	 * 请求接口
 	 * 

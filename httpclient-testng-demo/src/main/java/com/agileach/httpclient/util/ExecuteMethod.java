@@ -1,24 +1,16 @@
 package com.agileach.httpclient.util;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.config.CookieSpecs;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
@@ -50,7 +42,7 @@ public class ExecuteMethod {
 			// System.out.println(myEntity.getContentLength());
 			JSONObject jsonobj = new JSONObject(EntityUtils.toString(myEntity));
 			jsonobj.put(HTTPSTATUS, response.getStatusLine().getStatusCode());
-			System.out.println(jsonobj);
+			//System.out.println(jsonobj);
 			return jsonobj;
 		} finally {
 			response.close();

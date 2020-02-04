@@ -10,8 +10,8 @@ import com.agileach.httpclient.util.*;
 public class GetTest extends TestAPI{
 	protected Object[][] excelData;
 	private String url = "https://api.apishop.net/communication/phone/getLocationByPhoneNum?apiKey=IXuEAVG761353c0c8b926afff752c048fcaab888c9827e4&phoneNum=1861195236";
-
 	private static ExecuteMethod em;
+	
 	@BeforeClass
 	public void setUp() {
 		em = new ExecuteMethod();
