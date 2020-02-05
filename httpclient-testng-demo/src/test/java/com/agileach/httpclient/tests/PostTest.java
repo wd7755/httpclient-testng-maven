@@ -115,15 +115,7 @@ public class PostTest extends TestAPI {
 
 	@DataProvider
 	public Object[][] excelData() throws IOException {
-		Object[][] data = ExcelProcess.proessExcel(excelPath, 0);
-		int a = data.length - 1;
-		int b = data[a].length;
-		Object[][] newData = new Object[a][b];
-		for (int i = 1; i < data.length; i++) {
-			for (int j = 0; j < data[i].length; j++) {
-				newData[i - 1][j] = data[i][j];
-			}
-		}
-		return newData;
+		Object[][] data = ExcelProcess.proessExcel(excelPath, 0);	
+		return data;
 	}
 }

@@ -140,15 +140,7 @@ public class HttpClientUtilTest extends TestAPI{
 	@DataProvider
 	public Object[][] excelData() throws IOException {
 		Object[][] data = ExcelProcess.proessExcel(excelPath, 0);
-		int a = data.length - 1;
-		int b = data[a].length;
-		Object[][] newData = new Object[a][b];
-		for (int i = 1; i < data.length; i++) {
-			for (int j = 0; j < data[i].length; j++) {
-				newData[i - 1][j] = data[i][j];
-			}
-		}
-		return newData;
+		return data;
 	}
 
 	private void doPost(String testname, String method, String address, String checkpoint, String expectedResult,
@@ -184,5 +176,4 @@ public class HttpClientUtilTest extends TestAPI{
 			Assert.fail("发送请求失败！");
 		}		
 	}
-
 }

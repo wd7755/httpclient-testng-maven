@@ -19,8 +19,8 @@ public class ExcelProcess {
 		int numberOfRow = sheet.getPhysicalNumberOfRows();
 		int numberOfCell = sheet.getRow(0).getLastCellNum();
 		// 将表单数据处理存入dtt对象
-		Object[][] dttData = new Object[numberOfRow][numberOfCell];
-		for (int i = 0; i < numberOfRow; i++) {
+		Object[][] dttData = new Object[numberOfRow-1][numberOfCell];
+		for (int i = 1; i < numberOfRow; i++) {
 			if (null == sheet.getRow(i) || "".equals(sheet.getRow(i))) {
 				continue;
 			}
@@ -30,7 +30,7 @@ public class ExcelProcess {
 				}
 				HSSFCell cell = sheet.getRow(i).getCell(j);
 				cell.setCellType(CellType.STRING);
-				dttData[i][j] = cell.getStringCellValue();
+				dttData[i-1][j] = cell.getStringCellValue();
 			}
 		}
 		return dttData;
