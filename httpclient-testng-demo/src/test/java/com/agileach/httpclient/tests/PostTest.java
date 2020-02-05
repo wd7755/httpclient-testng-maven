@@ -62,7 +62,7 @@ public class PostTest extends TestAPI {
 		JSONObject jo = new JSONObject("{" + keyvalue + "}");
 		for (Iterator<String> iterator = jo.keySet().iterator(); iterator.hasNext();) {
 			String key = iterator.next();
-			String value = (String) String.valueOf(jo.get(key));
+			String value = String.valueOf(jo.get(key));
 			params.add(new BasicNameValuePair(key, value));
 		}
 		// 发送请求，获取反馈
