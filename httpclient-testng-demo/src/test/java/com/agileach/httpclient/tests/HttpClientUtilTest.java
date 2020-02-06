@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import org.json.JSONObject;
+import org.springframework.http.ResponseEntity;
 import org.testng.Assert;
 import org.testng.annotations.*;
 import com.agileach.httpclient.util.ExcelProcess;
@@ -19,11 +20,7 @@ public class HttpClientUtilTest extends TestAPI{
 		url = url.concat("?apiKey=IXuEAVG761353c0c8b926afff752c048fcaab888c9827e4&phoneNum=18666956958");
 		// 请求方法设置
 		String requestMethod = "get";
-		// 请求头部设置
-		Map<String, String> headers = new HashMap<String, String>();
-		// 请求参数设置
-		Map<String, String> params = new HashMap<String, String>();
-		String result = HttpClientUtil.proxyToDesURL(requestMethod, url, headers, params);
+		String result = HttpClientUtil.proxyToDesURL(requestMethod, url).getBody();
 		if (result != null) {
 			JSONObject jsonObject = new JSONObject(result);	
 			String status_code = jsonObject.getString("statusCode");
@@ -51,7 +48,7 @@ public class HttpClientUtilTest extends TestAPI{
 		Map<String, String> headers = new HashMap<String, String>();
 		// 请求参数设置
 		Map<String, String> params = new HashMap<String, String>();
-		String result = HttpClientUtil.proxyToDesURL(requestMethod, url, headers, params);
+		String result = HttpClientUtil.proxyToDesURL(requestMethod, url, headers, params).getBody();;
 		if (result != null) {
 			JSONObject jsonObject = new JSONObject(result);	
 			String status_code = jsonObject.getString("statusCode");
@@ -81,7 +78,7 @@ public class HttpClientUtilTest extends TestAPI{
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("apiKey", "IXuEAVG761353c0c8b926afff752c048fcaab888c9827e4");
 		params.put("phoneNum", "18088822736");
-		String result = HttpClientUtil.proxyToDesURL(requestMethod, url, headers, params);
+		String result = HttpClientUtil.proxyToDesURL(requestMethod, url, headers, params).getBody();;
 		if (result != null) {
 			JSONObject jsonObject = new JSONObject(result);	
 			String status_code = jsonObject.getString("statusCode");
@@ -111,7 +108,7 @@ public class HttpClientUtilTest extends TestAPI{
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("apiKey", "IXuEAVG761353c0c8b926afff752c048fcaab888c9827e4");
 		params.put("phoneNum", "abcedfg");
-		String result = HttpClientUtil.proxyToDesURL(requestMethod, url, headers, params);
+		String result = HttpClientUtil.proxyToDesURL(requestMethod, url, headers, params).getBody();;
 		if (result != null) {
 			JSONObject jsonObject = new JSONObject(result);	
 			String status_code = jsonObject.getString("statusCode");
@@ -159,7 +156,10 @@ public class HttpClientUtilTest extends TestAPI{
 			params.put(key, value);
 		}
 		// 发送请求，获取反馈
-		String result = HttpClientUtil.proxyToDesURL(method, url, headers, params);	
+		ResponseEntity<String> responseEntity = HttpClientUtil.proxyToDesURL(method, url, headers, params);
+		String result = responseEntity.getBody();
+		int code = responseEntity.getStatusCodeValue();
+		Assert.assertEquals(status, String.valueOf(code));
 		if (result != null) {
 			JSONObject jsonObject = new JSONObject(result);	
 			String status_code = jsonObject.getString("statusCode");

@@ -23,11 +23,22 @@ public class HttpClientUtil {
 	 * 
 	 * @param method  请求方法
 	 * @param url     请求地址
+	 * @return
+	 */
+	public static ResponseEntity<String> proxyToDesURL(String method, String url) {
+		Map<String, String> params = new HashMap<String, String>();
+		return proxyToDesURL(method, url, null,params);			
+	}	
+	/**
+	 * 请求接口
+	 * 
+	 * @param method  请求方法
+	 * @param url     请求地址
 	 * @param headers 请求头部
 	 * @param params  请求参数
 	 * @return
 	 */
-	public static String proxyToDesURL(String method, String url, Map<String, String> headers,
+	public static ResponseEntity<String> proxyToDesURL(String method, String url, Map<String, String> headers,
 			Map<String, String> params) {
 		// TODO Auto-generated method stub
 		try {
@@ -96,7 +107,8 @@ public class HttpClientUtil {
 			ResponseEntity<String> responseEntity = restTemplate.exchange(url, requestType, requestEntity, String.class,
 					params);
 			// 获取返回结果
-			return responseEntity.getBody();
+			return responseEntity;
+			//return responseEntity.getBody();
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
@@ -120,7 +132,10 @@ public class HttpClientUtil {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("apiKey", "IXuEAVG761353c0c8b926afff752c048fcaab888c9827e4");
 		params.put("phoneNum", "18088822736");
-		String result = proxyToDesURL(requestMethod, url, headers, params);
+		
+		ResponseEntity<String> responseEntity = proxyToDesURL(requestMethod, url, headers, params);
+		System.out.println("响应状态码是：" + responseEntity.getStatusCodeValue());		
+		String result = responseEntity.getBody();
 		if (result != null) {
 			JSONObject jsonObject = JSONObject.parseObject(result);
 			String status_code = jsonObject.getString("statusCode");
