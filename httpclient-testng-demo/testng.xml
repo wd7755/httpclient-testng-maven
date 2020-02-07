@@ -2,20 +2,17 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 <suite name="Suite">
 	<listeners>
-		<listener class-name="org.uncommons.reportng.HTMLReporter" />	
 		<!-- 
-		<listener class-name="com.agileach.httpclient.util.RetryListener" />
-		<listener class-name="com.agileach.httpclient.util.TestListener" />
+		<listener class-name="org.uncommons.reportng.HTMLReporter" /> 
+		<listener class-name="com.agileach.httpclient.util.RetryListener" /> 
+		<listener class-name="com.agileach.httpclient.util.TestListener" /> 
 		-->
+		<listener class-name="com.agileach.httpclient.util.ExtentTestNGReporterListener" />
 	</listeners>
 	<test thread-count="5" name="Test">
-		<classes>
-		    <class name="com.agileach.httpclient.tests.HttpClientUtilTest" />
-		    <!--
-			<class name="com.agileach.httpclient.tests.GetTest" />
-			<class name="com.agileach.httpclient.tests.PostTest" />			
-			<class name="com.agileach.httpclient.tests.retryDemoTest"/>
-			-->
+		<classes>			
+			<class name="com.agileach.httpclient.tests.ExecuteMethodTest" />
 		</classes>
-	</test> <!-- Test -->
+	</test>
+	<!-- Test -->
 </suite> <!-- Suite -->

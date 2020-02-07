@@ -1,48 +1,60 @@
 package com.agileach.httpclient.util;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
+import java.util.Map;
 import java.util.Set;
 import org.apache.http.HttpEntity;
-import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONObject;
+import org.apache.log4j.Logger;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+
 
 public class ExecuteMethod {
-	private static final String URL = "http://115.29.201.135/mobile/mobileapi.php";
-	private static final String pattern = "yyyy-MM-dd HH:mm:ss:SSS";
 	private CloseableHttpResponse response;
-	private long startTime = 0L;
-	private long endTime = 0L;
-	private String resString = "";
-	public static final String HTTPSTATUS = "HttpStatus";
+	public String HTTPSTATUS = "HttpStatus";
+	final static Logger Log = Logger.getLogger(ExecuteMethod.class);
 
 	/*
 	 * 执行Get方法并返回响应结果对象
 	 */
-	public JSONObject sendGet(String url) throws Exception {
+	public JSONObject sendGet(String url, HashMap<String, String> headers) throws Exception {
 //		RequestConfig globalConfig = RequestConfig.custom()
 //				.setCookieSpec(CookieSpecs.IGNORE_COOKIES).build();
 //		CloseableHttpClient httpclient = HttpClients.custom()
 //				.setDefaultRequestConfig(globalConfig).build();
-		CloseableHttpClient httpClient = HttpClients.createDefault();
-		HttpGet httpGet = new HttpGet(url);
-		response = httpClient.execute(httpGet);
 		try {
+			CloseableHttpClient httpClient = HttpClients.createDefault();
+			HttpGet httpGet = new HttpGet(url);
+			// 加载请求头到httpget对象
+			if (headers != null) {
+				for (Map.Entry<String, String> entry : headers.entrySet()) {
+					httpGet.addHeader(entry.getKey(), entry.getValue());
+				}
+			}
+			Log.info("开始发送get请求...");
+			response = httpClient.execute(httpGet);
+			Log.info("发送请求成功,得到响应对象。");
 			HttpEntity myEntity = response.getEntity();
 			// System.out.println(myEntity.getContentType());
 			// System.out.println(myEntity.getContentLength());
-			JSONObject jsonobj = new JSONObject(EntityUtils.toString(myEntity));
+			JSONObject jsonobj = JSON.parseObject(EntityUtils.toString(myEntity));					
 			jsonobj.put(HTTPSTATUS, response.getStatusLine().getStatusCode());
-			//System.out.println(jsonobj);
 			return jsonobj;
 		} finally {
 			response.close();
@@ -50,16 +62,13 @@ public class ExecuteMethod {
 	}
 
 	/*
-	 * 执行Post方法并返回响应结果对象
+	 * 执行Get方法并返回响应结果对象
 	 */
-	public JSONObject sendPost(String url, List<NameValuePair> parameters) throws Exception {
-		return sendPost(url, parameters, null);
+	public JSONObject sendGet(String url) throws Exception {
+		return this.sendGet(url, null);
 	}
 
-	/*
-	 * 执行Post方法并返回响应结果对象
-	 */
-	public JSONObject sendPost(String url, List<NameValuePair> parameters, HashMap<String, String> headers)
+	public JSONObject sendPost(String url, String json, HashMap<String, String> headers)
 			throws Exception {
 		// RequestConfig globalConfig = RequestConfig.custom()
 		// .setCookieSpec(CookieSpecs.IGNORE_COOKIES).build();
@@ -68,13 +77,55 @@ public class ExecuteMethod {
 
 		CloseableHttpClient httpClient = HttpClients.createDefault();
 		HttpPost httpPost = new HttpPost(url);
-		startTime = System.currentTimeMillis();
+		try {
+			httpPost.setEntity(new StringEntity(json));
+			// 设置请求主体格式	
+//			 httpPost.setHeader("Content-type","application/json; charset=utf-8");
+//			 httpPost.setHeader("Accept", "application/json");
+			if (headers != null) {
+				//加载请求头到httppost对象
+				for(Map.Entry<String, String> entry : headers.entrySet()) {
+					httpPost.setHeader(entry.getKey(), entry.getValue());
+				}
+			}
+			Log.info("开始发送post请求...");
+			response = httpClient.execute(httpPost);
+			Log.info("发送请求成功,得到响应对象。");		
+			JSONObject jsonobj = JSON.parseObject(EntityUtils.toString(response.getEntity()));	
+			jsonobj.put(HTTPSTATUS, response.getStatusLine().getStatusCode());
+			return jsonobj;
+		} finally {
+			response.close();
+		}
+	}	
+	
+	/**
+	 * 
+	 * @param url
+	 * @param parameters
+	 * @param headers
+	 * @return
+	 * @throws Exception
+	 */
+	public JSONObject sendPost(String url, Map<String, String> form, HashMap<String, String> headers)
+			throws Exception {
+		// RequestConfig globalConfig = RequestConfig.custom()
+		// .setCookieSpec(CookieSpecs.IGNORE_COOKIES).build();
+		// CloseableHttpClient httpclient = HttpClients.custom()
+		// .setDefaultRequestConfig(globalConfig).build();
+
+		CloseableHttpClient httpClient = HttpClients.createDefault();
+		HttpPost httpPost = new HttpPost(url);
 		try {
 			// 设置请求主体格式
-			httpPost.setEntity(new UrlEncodedFormEntity(parameters, "UTF-8"));
-			//httpPost.setHeader("Content-type","application/json; charset=utf-8");
-			//httpPost.setHeader("Accept", "application/json");
-
+			if (form.size() > 0) {
+				ArrayList<BasicNameValuePair> list = new ArrayList<>();
+				form.forEach(
+						(key, value) -> list.add(new BasicNameValuePair(key, value)));
+				httpPost.setEntity(new UrlEncodedFormEntity(list, "utf-8"));
+			}	
+//			 httpPost.setHeader("Content-type","application/json; charset=utf-8");
+			 //httpPost.setHeader("Accept", "application/json");
 			if (headers != null) {
 				// 设置头部信息
 				Set<String> set = headers.keySet();
@@ -84,36 +135,84 @@ public class ExecuteMethod {
 					httpPost.setHeader(key, value);
 				}
 			}
+			Log.info("开始发送post请求...");
 			response = httpClient.execute(httpPost);
-			JSONObject jsonobj = new JSONObject(EntityUtils.toString(response.getEntity()));
+			Log.info("发送请求成功,得到响应对象。");			
+			HttpEntity myEntity = response.getEntity();
+			JSONObject jsonobj = JSON.parseObject(EntityUtils.toString(myEntity));	
 			jsonobj.put(HTTPSTATUS, response.getStatusLine().getStatusCode());
-			//System.out.println(jsonobj);
 			return jsonobj;
 		} finally {
 			response.close();
 		}
 	}
 
-	/*
-	 * 获取随机字符串
-	 * 
-	 * @length: 字符串的长度
+	/**
+	  * 执行Post方法并返回JSONObject对象
+	 * @param url
+	 * @param parameters
+	 * @return JSONObject
+	 * @throws Exception
 	 */
-	public static String getRandomString(int length) {
-		// length表示生成字符串的长度
-		String base = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-		Random random = new Random();
-		StringBuffer sb = new StringBuffer();
-		for (int i = 0; i < length; i++) {
-			int number = random.nextInt(base.length());
-			sb.append(base.charAt(number));
+	public JSONObject sendPost(String url, Map<String, String> form) throws Exception {
+		return sendPost(url, form, null);
+	}
+	public JSONObject sendPost(String url, String json) throws Exception {
+		return sendPost(url, json, null);
+	}
+	/**
+	 * 封装 put请求方法并返回JSONObject对象 
+	 * @param url 接口url完整地址
+	 * @param entityString，这个主要是设置payload,一般来说就是json串
+	 * @param headers，带请求的头信息，格式是键值对，所以这里使用hashmap
+	 * @return JSONObject
+	 * @throws ClientProtocolException
+	 * @throws IOException
+	 */
+	public JSONObject sendPut(String url, String entityString, HashMap<String, String> headers)
+			throws ClientProtocolException, IOException {
+		try {
+			CloseableHttpClient httpclient = HttpClients.createDefault();
+			HttpPut httpput = new HttpPut(url);
+			httpput.setEntity(new StringEntity(entityString));
+			if (headers != null) {
+				for (Map.Entry<String, String> entry : headers.entrySet()) {
+					httpput.addHeader(entry.getKey(), entry.getValue());
+				}
+			}
+			// 发送put请求
+			Log.info("开始发送put请求...");
+			response = httpclient.execute(httpput);
+			Log.info("发送请求成功,得到响应对象。");
+			HttpEntity myEntity = response.getEntity();
+			JSONObject jsonobj = JSON.parseObject(EntityUtils.toString(myEntity));	
+			jsonobj.put(HTTPSTATUS, response.getStatusLine().getStatusCode());		
+			return jsonobj;
+		} finally {
+			response.close();
 		}
-		return sb.toString();
 	}
 
-	public static void main(String[] args) {
-		for (int i = 0; i < 3; i++) {
-			System.out.println(ExecuteMethod.getRandomString(6));
+	/**
+	 * 封装 delete请求方法，参数和get方法一样 *
+	 * 
+	 * @param url， 接口url完整地址
+	 * @return，返回一个JSONObject对象，方便进行得到状态码和json解析动作
+	 * @throws ClientProtocolException
+	 * @throws IOException
+	 */
+	public int sendDelete(String url) throws ClientProtocolException, IOException {
+		try {
+			CloseableHttpClient httpclient = HttpClients.createDefault();
+			HttpDelete httpdel = new HttpDelete(url);
+			// 发送delete请求
+			Log.info("开始发送delete请求...");
+			response = httpclient.execute(httpdel);
+			Log.info("发送请求成功,得到响应对象。");	
+			int statusCode = response.getStatusLine().getStatusCode();	
+			return statusCode;
+		} finally {
+			response.close();
 		}
 	}
 }

@@ -10,12 +10,12 @@ import org.testng.Assert;
 import org.testng.annotations.*;
 import com.agileach.httpclient.util.ExcelProcess;
 import com.agileach.httpclient.util.HttpClientUtil;
-import com.agileach.httpclient.util.TestAPI;
+import com.agileach.httpclient.util.TestBase;
 
-public class HttpClientUtilTest extends TestAPI{
+public class HttpClientUtilTest extends TestBase{
 	// 请求地址设置
 	private String url = "https://api.apishop.net/communication/phone/getLocationByPhoneNum";
-	@Test
+	@Test(enabled=false)
 	public void testGetMethod() {
 		url = url.concat("?apiKey=IXuEAVG761353c0c8b926afff752c048fcaab888c9827e4&phoneNum=18666956958");
 		// 请求方法设置
@@ -39,7 +39,7 @@ public class HttpClientUtilTest extends TestAPI{
 			Assert.fail("发送请求失败！");
 		}
 	}
-	@Test//(expectedExceptions = AssertionError.class)
+	@Test(enabled=false)//(expectedExceptions = AssertionError.class)
 	public void testGetMethodWrong() {
 		url = url.concat("?apiKey=IXuEAVG761353c0c8b926afff75******b888c9827e4&phoneNum=18666956958");
 		// 请求方法设置
@@ -128,8 +128,8 @@ public class HttpClientUtilTest extends TestAPI{
 		}
 	}
 	
-	@Test(dataProvider = "excelData")
-	public void testPhoneMember(String testname, String method, String address, String checkpoint,
+	@Test(dataProvider = "excelData",enabled = false)
+	public void testPostDataFromExcel(String testname, String method, String address, String checkpoint,
 			String expectedResult, String status, String keyvalue) throws Exception {
 		doPost(testname, method, address, checkpoint, expectedResult, status, keyvalue);
 	}
@@ -142,7 +142,7 @@ public class HttpClientUtilTest extends TestAPI{
 
 	private void doPost(String testname, String method, String address, String checkpoint, String expectedResult,
 			String status, String keyvalue) throws Exception {
-		url = host + address;
+		url = "https://api.apishop.net/" + address;
 		// 用哈希图准备请求头部信息
 		Map<String, String> headers = new HashMap<String, String>();
 		headers.put("Content-Type", "application/x-www-form-urlencoded");	
