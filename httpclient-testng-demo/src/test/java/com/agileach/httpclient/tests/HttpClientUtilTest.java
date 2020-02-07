@@ -4,13 +4,13 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import org.json.JSONObject;
 import org.springframework.http.ResponseEntity;
 import org.testng.Assert;
 import org.testng.annotations.*;
 import com.agileach.httpclient.util.ExcelProcess;
 import com.agileach.httpclient.util.HttpClientUtil;
 import com.agileach.httpclient.util.TestBase;
+import com.alibaba.fastjson.JSONObject;
 
 public class HttpClientUtilTest extends TestBase{
 	// 请求地址设置
@@ -22,7 +22,7 @@ public class HttpClientUtilTest extends TestBase{
 		String requestMethod = "get";
 		String result = HttpClientUtil.proxyToDesURL(requestMethod, url).getBody();
 		if (result != null) {
-			JSONObject jsonObject = new JSONObject(result);	
+			JSONObject jsonObject = JSONObject.parseObject(result);	
 			String status_code = jsonObject.getString("statusCode");
 			if (status_code.equals("000000")) {
 				// 状态码为000000, 说明请求成功
@@ -50,7 +50,7 @@ public class HttpClientUtilTest extends TestBase{
 		Map<String, String> params = new HashMap<String, String>();
 		String result = HttpClientUtil.proxyToDesURL(requestMethod, url, headers, params).getBody();;
 		if (result != null) {
-			JSONObject jsonObject = new JSONObject(result);	
+			JSONObject jsonObject = JSONObject.parseObject(result);	
 			String status_code = jsonObject.getString("statusCode");
 			if (status_code.equals("000000")) {
 				// 状态码为000000, 说明请求成功
@@ -80,7 +80,7 @@ public class HttpClientUtilTest extends TestBase{
 		params.put("phoneNum", "18088822736");
 		String result = HttpClientUtil.proxyToDesURL(requestMethod, url, headers, params).getBody();;
 		if (result != null) {
-			JSONObject jsonObject = new JSONObject(result);	
+			JSONObject jsonObject = JSONObject.parseObject(result);	
 			String status_code = jsonObject.getString("statusCode");
 			if (status_code.equals("000000")) {
 				// 状态码为000000, 说明请求成功
@@ -110,7 +110,7 @@ public class HttpClientUtilTest extends TestBase{
 		params.put("phoneNum", "abcedfg");
 		String result = HttpClientUtil.proxyToDesURL(requestMethod, url, headers, params).getBody();;
 		if (result != null) {
-			JSONObject jsonObject = new JSONObject(result);	
+			JSONObject jsonObject = JSONObject.parseObject(result);	
 			String status_code = jsonObject.getString("statusCode");
 			if (status_code.equals("000000")) {
 				// 状态码为000000, 说明请求成功
@@ -149,7 +149,7 @@ public class HttpClientUtilTest extends TestBase{
 		
 		Map<String, String> params = new HashMap<String, String>();		
 		// 取得POST提交的键值对数据	
-		JSONObject jo = new JSONObject("{" + keyvalue + "}");
+		JSONObject jo = JSONObject.parseObject("{" + keyvalue + "}");
 		for (Iterator<String> iterator = jo.keySet().iterator(); iterator.hasNext();) {
 			String key = iterator.next();
 			String value = String.valueOf(jo.get(key));
@@ -161,7 +161,7 @@ public class HttpClientUtilTest extends TestBase{
 		int code = responseEntity.getStatusCodeValue();
 		Assert.assertEquals(status, String.valueOf(code));
 		if (result != null) {
-			JSONObject jsonObject = new JSONObject(result);	
+			JSONObject jsonObject = JSONObject.parseObject(result);	
 			String status_code = jsonObject.getString("statusCode");
 			if (status_code.equals("000000")) {
 				// 状态码为000000, 说明请求成功
