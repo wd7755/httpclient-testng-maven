@@ -136,7 +136,7 @@ public class HttpClientUtilTest extends TestBase{
 
 	@DataProvider
 	public Object[][] excelData() throws IOException {
-		Object[][] data = ExcelProcess.proessExcel(excelPath, 0);
+		Object[][] data = ExcelProcess.proessExcelLessThan2010(excelPath, 0);
 		return data;
 	}
 

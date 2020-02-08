@@ -34,6 +34,6 @@ public class TestBase {
 	
 	@AfterMethod
 	public void AfterMethod() {
-		 Log.info("用例执行结束...");
+		 Log.info("用例执行结束");
 	}
 }

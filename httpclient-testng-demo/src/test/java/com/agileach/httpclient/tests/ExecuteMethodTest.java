@@ -53,7 +53,7 @@ public class ExecuteMethodTest extends TestBase {
 		HashMap<String, String> hashHead = new HashMap<String, String>();
 		hashHead.put("Content-Type", "application/x-www-form-urlencoded");
 		// 发送请求，获取反馈
-		JSONObject jsonobj = em.sendPost(url, params, hashHead);
+		JSONObject jsonobj = em.sendPostByForm(url, params, hashHead);
 		int httpStatus = jsonobj.getIntValue(em.HTTPSTATUS);
 		if (httpStatus != HttpStatus.SC_OK) {
 			Assert.fail("请求方式失败!状态码：" + httpStatus);
@@ -98,7 +98,7 @@ public class ExecuteMethodTest extends TestBase {
 
 	@DataProvider
 	public Object[][] excelData() throws IOException {
-		Object[][] data = ExcelProcess.proessExcel(excelPath, 0);
+		Object[][] data = ExcelProcess.proessExcelLessThan2010(excelPath, 0);
 		return data;
 	}
 
@@ -119,7 +119,7 @@ public class ExecuteMethodTest extends TestBase {
 			params.put(key, value);
 		}
 		// 发送请求，获取反馈
-		JSONObject jsonobj = em.sendPost(url, params, hashHead);
+		JSONObject jsonobj = em.sendPostByForm(url, params, hashHead);
 
 		int httpStatus = jsonobj.getIntValue(em.HTTPSTATUS);
 		if (httpStatus != Integer.valueOf(status).intValue()) {
@@ -129,7 +129,7 @@ public class ExecuteMethodTest extends TestBase {
 	}
 	
 	@Test
-	public void postApiTest() throws Exception {		
+	public void testPostByJson() throws Exception {		
 		String url = "https://reqres.in/api/users";		
 		//准备请求头信息
 		HashMap<String,String> headers = new HashMap<String,String>();
@@ -139,7 +139,7 @@ public class ExecuteMethodTest extends TestBase {
 		String userJsonString = JSON.toJSONString(user);		
 		//System.out.println(userJsonString);		
 		// 发送请求，获取反馈
-		JSONObject responseJson = em.sendPost(url, userJsonString, headers);
+		JSONObject responseJson = em.sendPostByJson(url, userJsonString, headers);
 		int httpStatus = responseJson.getIntValue(em.HTTPSTATUS);
 		//验证状态码是不是201	
 		if (httpStatus != 201) {
@@ -170,7 +170,7 @@ public class ExecuteMethodTest extends TestBase {
 	} 
 	
 	@Test
-	public void deleteApiTest() throws ClientProtocolException, IOException {		
+	public void deleteTest() throws ClientProtocolException, IOException {		
 		String url = "https://reqres.in/api/users/2";		
 		int httpStatus = em.sendDelete(url);
 		Log.info("测试响应状态码是否是204");			

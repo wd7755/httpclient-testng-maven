@@ -108,12 +108,12 @@ public class ExtentTestNGReporterListener implements IReporter {
         ExtentHtmlReporter htmlReporter = new ExtentHtmlReporter(OUTPUT_FOLDER + FILE_NAME);
         //设置静态文件的DNS
         //怎么样解决cdn.rawgit.com访问不了的情况
-        htmlReporter.config().setResourceCDN(ResourceCDN.EXTENTREPORTS);
+        htmlReporter.config().setResourceCDN(ResourceCDN.GITHUB);
         htmlReporter.config().setDocumentTitle("自动化接口测试报告");
         htmlReporter.config().setReportName("自动化接口测试报告");  
         htmlReporter.config().setChartVisibilityOnOpen(true);
         htmlReporter.config().setTestViewChartLocation(ChartLocation.TOP);
-        //htmlReporter.config().setTheme(Theme.STANDARD);
+        htmlReporter.config().setTheme(Theme.STANDARD);
         htmlReporter.config().setEncoding("GBK");
         htmlReporter.config().setCSS(".node.level-1  ul{ display:none;} .node.level-1.active ul{display:block;}");
         
