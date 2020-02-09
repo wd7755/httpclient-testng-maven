@@ -2,7 +2,8 @@ package com.agileach.httpclient.util;
 
 import java.io.FileInputStream;
 import java.util.Properties;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.*;
 
 
@@ -10,7 +11,7 @@ public class TestBase {
 	public Properties prop;
 	public String excelPath;
 	public String host;
-	public final Logger Log = Logger.getLogger(this.getClass());
+	public final Logger Log = LoggerFactory.getLogger(TestBase.class);
 	//protected Object[][] excelData;
 	// 构造函数
 	public TestBase() {

@@ -74,6 +74,7 @@ public class ExecuteMethodTest extends TestBase {
 	@Test(dataProvider = "excelData", enabled = true)
 	public void testPostDataFromExcel(String testname, String method, String address, String checkpoint,
 			String expectedResult, String status, String keyvalue) throws Exception {
+		Log.info("数据驱动测试用例！");			
 		doPost(testname, method, address, checkpoint, expectedResult, status, keyvalue);
 	}
 
@@ -99,6 +100,7 @@ public class ExecuteMethodTest extends TestBase {
 	@DataProvider
 	public Object[][] excelData() throws IOException {
 		Object[][] data = ExcelProcess.proessExcelLessThan2010(excelPath, 0);
+		Log.info("获取Excel中数据成功！");
 		return data;
 	}
 

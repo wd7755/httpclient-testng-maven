@@ -1,17 +1,11 @@
 package com.agileach.httpclient.util;
 
 import java.util.Random;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.HashMap;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.ReadContext;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.util.EntityUtils;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -60,31 +54,7 @@ public class Util {
 	public static int getStatusCode(CloseableHttpResponse closeableHttpResponse) {
 		int StatusCode = closeableHttpResponse.getStatusLine().getStatusCode();
 		return StatusCode;
-	}
-
-	public static Object[][] proessExcel(String filePath, int sheetId) throws IOException {
-		FileInputStream fis = new FileInputStream(filePath);
-		XSSFWorkbook wb = new XSSFWorkbook(fis);
-		XSSFSheet sh = wb.getSheetAt(sheetId);
-		int numberrow = sh.getPhysicalNumberOfRows();
-		int numbercell = sh.getRow(0).getLastCellNum();
-
-		Object[][] dttData = new Object[numberrow - 1][numbercell];
-		for (int i = 1; i < numberrow; i++) {
-			if (null == sh.getRow(i) || "".equals(sh.getRow(i))) {
-				continue;
-			}
-			for (int j = 0; j < numbercell; j++) {
-				if (null == sh.getRow(i).getCell(j) || "".equals(sh.getRow(i).getCell(j))) {
-					continue;
-				}
-				XSSFCell cell = sh.getRow(i).getCell(j);
-				cell.setCellType(CellType.STRING);
-				dttData[i - 1][j] = cell.getStringCellValue();
-			}
-		}
-		return dttData;
-	}
+	}	
 
 	/*
 	 * 获取随机字符串

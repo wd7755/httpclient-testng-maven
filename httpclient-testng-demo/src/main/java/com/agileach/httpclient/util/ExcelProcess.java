@@ -70,4 +70,29 @@ public class ExcelProcess {
 		workbook.close();
 		return records.iterator();	
 	}	
+	
+	public static Object[][] proessExcelGreatThan2010(String filePath, int sheetId) throws IOException {
+		InputStream fis = new FileInputStream(filePath);
+		XSSFWorkbook wb = new XSSFWorkbook(fis);
+		XSSFSheet sh = wb.getSheetAt(sheetId);
+		int numberrow = sh.getPhysicalNumberOfRows();
+		int numbercell = sh.getRow(0).getLastCellNum();
+
+		Object[][] dttData = new Object[numberrow - 1][numbercell];
+		for (int i = 1; i < numberrow; i++) {
+			if (null == sh.getRow(i) || "".equals(sh.getRow(i))) {
+				continue;
+			}
+			for (int j = 0; j < numbercell; j++) {
+				if (null == sh.getRow(i).getCell(j) || "".equals(sh.getRow(i).getCell(j))) {
+					continue;
+				}
+				XSSFCell cell = sh.getRow(i).getCell(j);
+				cell.setCellType(CellType.STRING);
+				dttData[i - 1][j] = cell.getStringCellValue();
+			}
+		}
+		wb.close();
+		return dttData;
+	}
 }

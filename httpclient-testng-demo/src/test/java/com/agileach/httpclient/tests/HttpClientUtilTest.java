@@ -39,7 +39,7 @@ public class HttpClientUtilTest extends TestBase{
 			Assert.fail("发送请求失败！");
 		}
 	}
-	@Test(enabled=false)//(expectedExceptions = AssertionError.class)
+	@Test(expectedExceptions = AssertionError.class)
 	public void testGetMethodWrong() {
 		url = url.concat("?apiKey=IXuEAVG761353c0c8b926afff75******b888c9827e4&phoneNum=18666956958");
 		// 请求方法设置
@@ -59,6 +59,7 @@ public class HttpClientUtilTest extends TestBase{
 				JSONObject jo = jsonObject.getJSONObject("result");				
 				Assert.assertEquals(city, jo.getString("city"));
 			} else {
+				Log.error(AssertionError.class.getCanonicalName());
 				// 状态码非000000, 说明请求失败
 				Assert.fail("测试不通过：状态码是：" + status_code);
 			}
