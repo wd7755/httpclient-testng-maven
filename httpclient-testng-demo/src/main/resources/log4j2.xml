@@ -20,12 +20,17 @@
         	</Policies>
         	<DefaultRolloverStrategy max="20"/>
         </RollingRandomAccessFile>
+        <File name="ERROR" fileName="${LOG_HOME}/error.log">
+            <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %l - %msg%n"/>
+        </File>
     </Appenders>  
     
     <Loggers>  
     	<Root level="info">  
     		<AppenderRef ref="Console" />  
 	        <AppenderRef ref="RollingRandomAccessFile" />  
+	        <AppenderRef ref="ERROR" />  
 	    </Root>
 	    
 	    <Logger name="com.agileach.httpclient.util.OperateDB" level="${log.sql.level}" additivity="false">

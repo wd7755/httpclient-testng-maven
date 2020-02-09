@@ -74,8 +74,13 @@ public class ExecuteMethodTest extends TestBase {
 	@Test(dataProvider = "excelData", enabled = true)
 	public void testPostDataFromExcel(String testname, String method, String address, String checkpoint,
 			String expectedResult, String status, String keyvalue) throws Exception {
-		Log.info("数据驱动测试用例！");			
-		doPost(testname, method, address, checkpoint, expectedResult, status, keyvalue);
+		Log.info("数据驱动测试用例！");		
+		try {
+			doPost(testname, method, address, checkpoint, expectedResult, status, keyvalue);
+		}catch(Exception e) {
+			Log.error(e.getMessage());
+			throw e;
+		}
 	}
 
 	@DataProvider
