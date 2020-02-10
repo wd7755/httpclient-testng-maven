@@ -15,11 +15,11 @@ import java.io.File;
 import java.util.*;
              
 public class ExtentTestNGReporterListener implements IReporter {
-    static Date date = new Date();
-    static String form = String.format("%tF", date);
-    static String hour = String.format("%tH", date);
-    static String minute = String.format("%tM", date);
-    static String second = String.format("%tS", date);
+    //static Date date = new Date();
+    //static String form = String.format("%tF", date);
+   // static String hour = String.format("%tH", date);
+    //static String minute = String.format("%tM", date);
+    //static String second = String.format("%tS", date);
     //生成的路径以及文件名
     private static final String OUTPUT_FOLDER = "test-output/";
     private static final String FILE_NAME = "index.html";
@@ -114,7 +114,7 @@ public class ExtentTestNGReporterListener implements IReporter {
         htmlReporter.config().setChartVisibilityOnOpen(true);
         htmlReporter.config().setTestViewChartLocation(ChartLocation.TOP);
         htmlReporter.config().setTheme(Theme.STANDARD);
-        htmlReporter.config().setEncoding("UTF-8");
+        //htmlReporter.config().setEncoding("UTF-8");
         htmlReporter.config().setCSS(".node.level-1  ul{ display:none;} .node.level-1.active ul{display:block;}");
         
         extent = new ExtentReports();
