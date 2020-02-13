@@ -1,6 +1,7 @@
 package com.agileach.httpclient.tests;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import org.apache.http.HttpStatus;
@@ -104,7 +105,9 @@ public class ExecuteMethodTest extends TestBase {
 
 	@DataProvider
 	public Object[][] excelData() throws IOException {
-		Object[][] data = ExcelProcess.proessExcelLessThan2010(excelPath, 0);
+		//String fileName = this.getClass().getSimpleName() + ".xlsx";	
+		InputStream is = this.getClass().getClassLoader().getResourceAsStream("APIcase.xls");
+		Object[][] data = ExcelProcess.proessExcelLessThan2010(is, 0);
 		Log.info("获取Excel中数据成功！");
 		return data;
 	}

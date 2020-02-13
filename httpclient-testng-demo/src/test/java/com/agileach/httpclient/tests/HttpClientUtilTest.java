@@ -1,6 +1,7 @@
 package com.agileach.httpclient.tests;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -137,7 +138,8 @@ public class HttpClientUtilTest extends TestBase{
 
 	@DataProvider
 	public Object[][] excelData() throws IOException {
-		Object[][] data = ExcelProcess.proessExcelLessThan2010(excelPath, 0);
+		InputStream is = this.getClass().getClassLoader().getResourceAsStream("APIcase.xls");
+		Object[][] data = ExcelProcess.proessExcelGreatThan2010(is, 0);
 		return data;
 	}
 

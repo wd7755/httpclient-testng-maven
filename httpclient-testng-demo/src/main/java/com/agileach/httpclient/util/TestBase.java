@@ -1,15 +1,13 @@
 package com.agileach.httpclient.util;
 
-import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.*;
 
-
 public class TestBase {
-	public Properties prop;
-	public String excelPath;
+	private Properties prop;
 	public String host;
 	public final Logger Log = LoggerFactory.getLogger(TestBase.class);
 	//protected Object[][] excelData;
@@ -18,14 +16,12 @@ public class TestBase {
 		try {
 			// 数据流的形式读取配置文件
 			prop = new Properties();
-			FileInputStream fis = new FileInputStream(
-					System.getProperty("user.dir") + "/src/main/resources/config.properties");
+			InputStream fis = this.getClass().getClassLoader().getResourceAsStream("config.properties");					
 			prop.load(fis);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		host = prop.getProperty("Host");
-		excelPath = prop.getProperty("testData");
+		host = prop.getProperty("Host");		
 	}	
 	
 	@BeforeMethod

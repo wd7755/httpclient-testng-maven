@@ -1,7 +1,5 @@
 package com.agileach.httpclient.util;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -18,11 +16,8 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class ExcelProcess {
-	public static Object[][] proessExcelLessThan2010(String filePath, int sheetId) throws IOException {
-		// 数据流读入excel
-		File file = new File(System.getProperty("user.dir") + filePath);
-		FileInputStream fis = new FileInputStream(file);
-		HSSFWorkbook wb = new HSSFWorkbook(fis);
+	public static Object[][] proessExcelLessThan2010(InputStream is, int sheetId) throws IOException {	
+		HSSFWorkbook wb = new HSSFWorkbook(is);
 		// 读取特定表单并计算行列数
 		HSSFSheet sheet = wb.getSheetAt(sheetId);
 		int numberOfRow = sheet.getPhysicalNumberOfRows();
@@ -45,8 +40,7 @@ public class ExcelProcess {
 		return dttData;
 	}
 	
-	public static Iterator<String[]> proessExcel(String filePath, int sheetId) throws IOException {			
-		InputStream is = new FileInputStream(filePath);
+	public static Iterator<String[]> proessExcel(InputStream is, int sheetId) throws IOException {	
 		XSSFWorkbook workbook = new XSSFWorkbook(is);
 		// 获得工作表
 		XSSFSheet sheet = workbook.getSheetAt(sheetId);
@@ -71,9 +65,8 @@ public class ExcelProcess {
 		return records.iterator();	
 	}	
 	
-	public static Object[][] proessExcelGreatThan2010(String filePath, int sheetId) throws IOException {
-		InputStream fis = new FileInputStream(filePath);
-		XSSFWorkbook wb = new XSSFWorkbook(fis);
+	public static Object[][] proessExcelGreatThan2010(InputStream is, int sheetId) throws IOException {	
+		XSSFWorkbook wb = new XSSFWorkbook(is);
 		XSSFSheet sh = wb.getSheetAt(sheetId);
 		int numberrow = sh.getPhysicalNumberOfRows();
 		int numbercell = sh.getRow(0).getLastCellNum();
