@@ -1,11 +1,9 @@
 package com.agileach.httpclient.tests;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.ClientProtocolException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -27,11 +25,31 @@ public class ExecuteMethodTest extends TestBase {
 	}
 
 	@Test
-	public void testGet() throws Exception {
+	public void testGet1() throws Exception {
 		String url = "https://api.apishop.net/communication/phone/getLocationByPhoneNum";
 		url = url.concat("?apiKey=IXuEAVG761353c0c8b926afff752c048fcaab888c9827e4&phoneNum=1861195236");
 		// 发送请求，获取反馈
 		JSONObject jsonobj = em.sendGet(url);
+		int httpStatus = jsonobj.getIntValue(em.HTTPSTATUS);
+		if (httpStatus != HttpStatus.SC_OK) {
+			Assert.fail("请求方式失败!状态码：" + httpStatus);
+		}
+		String expectedResult = "北京";	
+		Assert.assertEquals(expectedResult, Util.getValueByJPath(jsonobj, "result/city"));
+//		String count = OperateDB.getScalarValue(
+//				"Select count(*) From member Where city=?", new String[] { city });
+//		Assert.assertEquals("1", count);
+	}
+	
+	
+	@Test
+	public void testGet2() throws Exception {
+		String url = "https://api.apishop.net/communication/phone/getLocationByPhoneNum";		
+		// 发送请求，获取反馈
+		HashMap<String,String> params = new HashMap<String,String>();
+		params.put("apiKey", "IXuEAVG761353c0c8b926afff752c048fcaab888c9827e4");
+		params.put("phoneNum", "1861195236");
+		JSONObject jsonobj = em.sendGet(url, params);
 		int httpStatus = jsonobj.getIntValue(em.HTTPSTATUS);
 		if (httpStatus != HttpStatus.SC_OK) {
 			Assert.fail("请求方式失败!状态码：" + httpStatus);
@@ -99,13 +117,11 @@ public class ExecuteMethodTest extends TestBase {
 						"\"apiKey\":\"IXuEAVG761353c0c8b926afff752c048fcaab888c9827e4\",\"phoneNum\":186123" },
 				{ "验证apiKey错误归属地获取失败", "post", "communication/phone/getLocationByPhoneNum", "city", "北京", "200",
 						"\"apiKey\":\"IXuEAVG761353777777fff752c048fcaab888c9827e4\",\"phoneNum\":186123" } };
-
 		return testData;
 	}
 
 	@DataProvider
-	public Object[][] excelData() throws IOException {
-		//String fileName = this.getClass().getSimpleName() + ".xlsx";	
+	public Object[][] excelData() throws Exception {		
 		InputStream is = this.getClass().getClassLoader().getResourceAsStream("APIcase.xls");
 		Object[][] data = ExcelProcess.proessExcelLessThan2010(is, 0);
 		Log.info("获取Excel中数据成功！");
@@ -130,7 +146,6 @@ public class ExecuteMethodTest extends TestBase {
 		}
 		// 发送请求，获取反馈
 		JSONObject jsonobj = em.sendPostByForm(url, params, hashHead);
-
 		int httpStatus = jsonobj.getIntValue(em.HTTPSTATUS);
 		if (httpStatus != Integer.valueOf(status).intValue()) {
 			Assert.fail("请求方式失败!状态码：" + httpStatus);
@@ -145,11 +160,9 @@ public class ExecuteMethodTest extends TestBase {
 		HashMap<String,String> headers = new HashMap<String,String>();
 		headers.put("Content-Type", "application/json"); 		
 		//对象转换成Json字符串
-		Users user = new Users("Anthony","tester");
-		String userJsonString = JSON.toJSONString(user);		
-		//System.out.println(userJsonString);		
+		Users user = new Users("Anthony","tester");	
 		// 发送请求，获取反馈
-		JSONObject responseJson = em.sendPostByJson(url, userJsonString, headers);
+		JSONObject responseJson = em.sendPostByJson(url, user, headers);
 		int httpStatus = responseJson.getIntValue(em.HTTPSTATUS);
 		//验证状态码是不是201	
 		if (httpStatus != 201) {
@@ -163,7 +176,7 @@ public class ExecuteMethodTest extends TestBase {
 	}		
 	
 	@Test
-	public void putTest() throws ClientProtocolException, IOException{
+	public void putTest() throws Exception{
 		String url = "https://reqres.in/api/users/2";		
 		HashMap<String,String> headers = new HashMap<String,String>();
 		headers.put("Content-Type", "application/json"); //这个在postman中可以查询到		
@@ -180,7 +193,7 @@ public class ExecuteMethodTest extends TestBase {
 	} 
 	
 	@Test
-	public void deleteTest() throws ClientProtocolException, IOException {		
+	public void deleteTest() throws Exception {		
 		String url = "https://reqres.in/api/users/2";		
 		int httpStatus = em.sendDelete(url);
 		Log.info("测试响应状态码是否是204");			

@@ -1,6 +1,8 @@
 package com.agileach.httpclient.util;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -9,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
+import org.apache.http.ParseException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -17,7 +20,10 @@ import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
@@ -31,28 +37,74 @@ public class ExecuteMethod {
 	private CloseableHttpClient httpClient;
 	private CloseableHttpResponse response;
 	private RequestConfig requestConfig;
-	public String HTTPSTATUS = "HttpStatus";
+	public final String HTTPSTATUS = "HttpStatus";
+	private final static String DEFAULT_CHARSET = "UTF-8";
 	private final static Logger Log = LoggerFactory.getLogger(ExecuteMethod.class);
 
-	public ExecuteMethod() {		
-		requestConfig = RequestConfig.custom().setConnectTimeout(5000).setConnectionRequestTimeout(1000).setSocketTimeout(10000).build();
+	public ExecuteMethod() {
+		requestConfig = RequestConfig.custom().setConnectTimeout(5000).setConnectionRequestTimeout(1000)
+				.setSocketTimeout(10000).build();
 	}
 
 	/**
 	 * 
-	 * @param connectTimeout 设置连接超时时间，单位毫秒。
-	 * @param connectionRequestTimeout 设置从connect Manager(连接池)获取Connection 超时时间，单位毫秒。这个属性是新加的属性，因为目前版本是可以共享连接池的。
-	 * @param socketTimeout 请求获取数据的超时时间(即响应时间)，单位毫秒。 如果访问一个接口，多少时间内无法返回数据，就直接放弃此次调用。
+	 * @param connectTimeout           设置连接超时时间，单位毫秒。
+	 * @param connectionRequestTimeout 设置从connect Manager(连接池)获取Connection
+	 *                                 超时时间，单位毫秒。这个属性是新加的属性，因为目前版本是可以共享连接池的。
+	 * @param socketTimeout            请求获取数据的超时时间(即响应时间)，单位毫秒。
+	 *                                 如果访问一个接口，多少时间内无法返回数据，就直接放弃此次调用。
 	 */
-	public ExecuteMethod(int connectTimeout, int connectionRequestTimeout, int socketTimeout) {			
-		requestConfig = RequestConfig.custom().setConnectTimeout(connectTimeout).setConnectionRequestTimeout(connectionRequestTimeout).setSocketTimeout(socketTimeout).build();
-	}	
-	
-	public JSONObject sendGet(String url, HashMap<String, String> params, HashMap<String, String> headers)
-			throws Exception {
+	public ExecuteMethod(int connectTimeout, int connectionRequestTimeout, int socketTimeout) {
+		requestConfig = RequestConfig.custom().setConnectTimeout(connectTimeout)
+				.setConnectionRequestTimeout(connectionRequestTimeout).setSocketTimeout(socketTimeout).build();
+	}
+
+	private JSONObject getJSONObject(CloseableHttpResponse response) throws Exception {
+		// 获取返回参数
+		HttpEntity entity = response.getEntity();
+		String result = null;
+		if (entity != null) {
+			try {
+				result = EntityUtils.toString(entity, DEFAULT_CHARSET);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block		
+				throw new MyException(e);
+			}
+		}	
+		try {
+			// 释放请求，关闭连接
+			EntityUtils.consume(entity);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block		
+			throw new MyException(e);
+		}		
+		JSONObject jsonobj = JSON.parseObject(result);
+		jsonobj.put(HTTPSTATUS, response.getStatusLine().getStatusCode());
+		Log.info("解析为JSON对象成功...");
+		return jsonobj;
+	}
+
+	public JSONObject sendGet(String url, Map<String, String> params, Map<String, String> headers) throws Exception
+			 {
 		httpClient = HttpClients.createDefault();
+		// 拼接url
+		if (params != null) {
+			List<NameValuePair> pairs = new ArrayList<NameValuePair>();
+			for (Map.Entry<String, String> entry : params.entrySet()) {
+				String value = entry.getValue();
+				if (!value.isEmpty()) {
+					pairs.add(new BasicNameValuePair(entry.getKey(), value));
+				}
+			}
+			try {
+				url += "?" + EntityUtils.toString(new UrlEncodedFormEntity(pairs), DEFAULT_CHARSET);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				throw new MyException(e);
+			}
+		}
 		HttpGet httpGet = new HttpGet(url);
-		try {		
+		try {
 			httpGet.setConfig(requestConfig);
 			// 加载请求头到httpget对象
 			if (headers != null) {
@@ -60,32 +112,15 @@ public class ExecuteMethod {
 					httpGet.setHeader(entry.getKey(), entry.getValue());
 				}
 			}
-			// 拼接url
-			if (params != null) {
-				List<NameValuePair> pairs = new ArrayList<NameValuePair>();
-				for (Map.Entry<String, String> entry : params.entrySet()) {
-					String value = entry.getValue();
-					if (!value.isEmpty()) {
-						pairs.add(new BasicNameValuePair(entry.getKey(), value));
-					}
-				}
-				url += "?" + EntityUtils.toString(new UrlEncodedFormEntity(pairs), "UTF-8");
-			}
 			Log.info("开始发送get请求...");
-			response = httpClient.execute(httpGet);
-			Log.info("发送请求成功,得到响应对象...");
-			// 获取返回参数
-			HttpEntity entity = response.getEntity();
-			String result = null;
-			if (entity != null) {
-				result = EntityUtils.toString(entity, "UTF-8");
+			try {
+				response = httpClient.execute(httpGet);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block			
+				throw new MyException(e);
 			}
-			// 释放请求，关闭连接
-			EntityUtils.consume(entity);
-			JSONObject jsonobj = JSON.parseObject(result);
-			jsonobj.put(HTTPSTATUS, response.getStatusLine().getStatusCode());
-			Log.info("解析为JSON对象成功...");
-			return jsonobj;
+			Log.info("发送请求成功,得到响应对象...");
+			return getJSONObject(response);
 		} finally {
 			httpClient.close();
 			response.close();
@@ -95,7 +130,7 @@ public class ExecuteMethod {
 	/*
 	 * 执行Get方法并返回响应结果对象
 	 */
-	public JSONObject sendGet(String url, HashMap<String, String> params) throws Exception {
+	public JSONObject sendGet(String url, Map<String, String> params) throws Exception {
 		return this.sendGet(url, params, null);
 	}
 
@@ -106,12 +141,13 @@ public class ExecuteMethod {
 		return this.sendGet(url, null, null);
 	}
 
-	public JSONObject sendPostByJson(String url, String json, HashMap<String, String> headers) throws Exception {
+	public JSONObject sendPostByJson(String url, Object object, Map<String, String> headers) throws Exception {
 		httpClient = HttpClients.createDefault();
-		HttpPost httpPost = new HttpPost(url);	
+		HttpPost httpPost = new HttpPost(url);
 		try {
 			httpPost.setConfig(requestConfig);
-			StringEntity entity = new StringEntity(json, "utf-8");
+			String json = JSON.toJSONString(object);
+			StringEntity entity = new StringEntity(json, DEFAULT_CHARSET);
 			entity.setContentType("application/json");
 			httpPost.setEntity(entity);
 			if (headers != null) {
@@ -121,18 +157,14 @@ public class ExecuteMethod {
 				}
 			}
 			Log.info("开始发送post请求...");
-			response = httpClient.execute(httpPost);
-			Log.info("发送请求成功,得到响应对象。");
-			HttpEntity responseEntity = response.getEntity();
-			String result = null;
-			if (responseEntity != null) {
-				result = EntityUtils.toString(responseEntity, "UTF-8");
+			try {
+				response = httpClient.execute(httpPost);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				throw new MyException(e);
 			}
-			EntityUtils.consume(responseEntity);
-			JSONObject jsonobj = JSON.parseObject(result);
-			jsonobj.put(HTTPSTATUS, response.getStatusLine().getStatusCode());
-			Log.info("解析为JSON对象成功...");
-			return jsonobj;
+			Log.info("发送请求成功,得到响应对象。");
+			return getJSONObject(response);
 		} finally {
 			httpClient.close();
 			response.close();
@@ -145,19 +177,20 @@ public class ExecuteMethod {
 	 * @param parameters
 	 * @param headers
 	 * @return
+	 * @throws Throwable
 	 * @throws Exception
 	 */
-	public JSONObject sendPostByForm(String url, Map<String, String> form, HashMap<String, String> headers)
+	public JSONObject sendPostByForm(String url, Map<String, String> form, Map<String, String> headers)
 			throws Exception {
 		httpClient = HttpClients.createDefault();
-		HttpPost httpPost = new HttpPost(url);	
+		HttpPost httpPost = new HttpPost(url);
 		try {
 			httpPost.setConfig(requestConfig);
 			// 设置请求主体格式
 			if (form.size() > 0) {
 				ArrayList<BasicNameValuePair> list = new ArrayList<>();
 				form.forEach((key, value) -> list.add(new BasicNameValuePair(key, value)));
-				UrlEncodedFormEntity entity = new UrlEncodedFormEntity(list, "UTF-8");
+				UrlEncodedFormEntity entity = new UrlEncodedFormEntity(list, DEFAULT_CHARSET);
 				entity.setContentType("application/x-www-form-urlencoded");
 				httpPost.setEntity(entity);
 			}
@@ -171,18 +204,14 @@ public class ExecuteMethod {
 				}
 			}
 			Log.info("开始发送post请求...");
-			response = httpClient.execute(httpPost);
-			Log.info("发送请求成功,得到响应对象。");
-			HttpEntity entity = response.getEntity();
-			String result = null;
-			if (entity != null) {
-				result = EntityUtils.toString(entity, "utf-8");
+			try {
+				response = httpClient.execute(httpPost);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				throw new MyException(e);
 			}
-			EntityUtils.consume(entity);
-			JSONObject jsonobj = JSON.parseObject(result);
-			jsonobj.put(HTTPSTATUS, response.getStatusLine().getStatusCode());
-			Log.info("解析为JSON对象成功...");
-			return jsonobj;
+			Log.info("发送请求成功,得到响应对象。");
+			return getJSONObject(response);
 		} finally {
 			httpClient.close();
 			response.close();
@@ -201,8 +230,8 @@ public class ExecuteMethod {
 		return sendPostByForm(url, form, null);
 	}
 
-	public JSONObject sendPostByJson(String url, String json) throws Exception {
-		return sendPostByJson(url, json, null);
+	public JSONObject sendPostByJson(String url, Object object) throws Exception {
+		return sendPostByJson(url, object, null);
 	}
 
 	/**
@@ -215,13 +244,12 @@ public class ExecuteMethod {
 	 * @throws ClientProtocolException
 	 * @throws IOException
 	 */
-	public JSONObject sendPut(String url, String entityString, HashMap<String, String> headers)
-			throws ClientProtocolException, IOException {
+	public JSONObject sendPut(String url, String entityString, Map<String, String> headers) throws Exception {
 		httpClient = HttpClients.createDefault();
-		HttpPut httpPut = new HttpPut(url);		
+		HttpPut httpPut = new HttpPut(url);
 		try {
 			httpPut.setConfig(requestConfig);
-			httpPut.setEntity(new StringEntity(entityString, "utf-8"));
+			httpPut.setEntity(new StringEntity(entityString, DEFAULT_CHARSET));
 			if (headers != null) {
 				for (Map.Entry<String, String> entry : headers.entrySet()) {
 					httpPut.setHeader(entry.getKey(), entry.getValue());
@@ -229,18 +257,14 @@ public class ExecuteMethod {
 			}
 			// 发送put请求
 			Log.info("开始发送put请求...");
-			response = httpClient.execute(httpPut);
-			Log.info("发送请求成功,得到响应对象。");
-			HttpEntity entity = response.getEntity();
-			String result = null;
-			if (entity != null) {
-				result = EntityUtils.toString(entity, "utf-8");
+			try {
+				response = httpClient.execute(httpPut);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				throw new MyException(e);
 			}
-			EntityUtils.consume(entity);
-			JSONObject jsonobj = JSON.parseObject(result);
-			jsonobj.put(HTTPSTATUS, response.getStatusLine().getStatusCode());
-			Log.info("解析为JSON对象成功...");
-			return jsonobj;
+			Log.info("发送请求成功,得到响应对象。");
+			return getJSONObject(response);
 		} finally {
 			httpClient.close();
 			response.close();
@@ -255,18 +279,74 @@ public class ExecuteMethod {
 	 * @throws ClientProtocolException
 	 * @throws IOException
 	 */
-	public int sendDelete(String url) throws ClientProtocolException, IOException {
+	public int sendDelete(String url) throws Exception {
 		httpClient = HttpClients.createDefault();
 		HttpDelete httpDel = new HttpDelete(url);
 		try {
 			httpDel.setConfig(requestConfig);
 			// 发送delete请求
 			Log.info("开始发送delete请求...");
-			response = httpClient.execute(httpDel);
+			try {
+				response = httpClient.execute(httpDel);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				throw new MyException(e);
+			}
 			Log.info("发送请求成功,得到响应对象。");
 			int statusCode = response.getStatusLine().getStatusCode();
 			Log.info("得到StatusCode成功，StatusCode：" + statusCode);
 			return statusCode;
+		} finally {
+			httpClient.close();
+			response.close();
+		}
+	}
+	
+
+	/**
+	 * 发送 http post 请求，支持文件上传
+	 * 
+	 * @throws IOException
+	 * @throws ParseException
+	 */
+	public JSONObject httpPostFormMultipart(String url, Map<String, String> params, List<File> files,
+			Map<String, String> headers) throws Exception  {
+		httpClient = HttpClients.createDefault();
+		HttpPost httpost = new HttpPost(url);
+
+		// 设置header
+		if (headers != null && headers.size() > 0) {
+			for (Map.Entry<String, String> entry : headers.entrySet()) {
+				httpost.setHeader(entry.getKey(), entry.getValue());
+			}
+		}
+		try {
+			MultipartEntityBuilder mEntityBuilder = MultipartEntityBuilder.create();
+			mEntityBuilder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+			mEntityBuilder.setCharset(Charset.forName(DEFAULT_CHARSET));
+	
+			// 普通参数
+			ContentType contentType = ContentType.create("text/plain", Charset.forName(DEFAULT_CHARSET));// 解决中文乱码
+			if (params != null && params.size() > 0) {
+				Set<String> keySet = params.keySet();
+				for (String key : keySet) {
+					mEntityBuilder.addTextBody(key, params.get(key), contentType);
+				}
+			}
+			// 二进制参数
+			if (files != null && files.size() > 0) {
+				for (File file : files) {
+					mEntityBuilder.addBinaryBody("file", file);
+				}
+			}
+			httpost.setEntity(mEntityBuilder.build());		
+			try {
+				response = httpClient.execute(httpost);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				throw new MyException(e);
+			}
+			return getJSONObject(response);
 		} finally {
 			httpClient.close();
 			response.close();

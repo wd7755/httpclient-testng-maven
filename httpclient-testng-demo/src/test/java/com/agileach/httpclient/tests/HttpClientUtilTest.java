@@ -138,7 +138,7 @@ public class HttpClientUtilTest extends TestBase{
 
 	@DataProvider
 	public Object[][] excelData() throws IOException {
-		InputStream is = this.getClass().getClassLoader().getResourceAsStream("APIcase.xls");
+		InputStream is = this.getClass().getClassLoader().getResourceAsStream("APIcase.xlsx");
 		Object[][] data = ExcelProcess.proessExcelGreatThan2010(is, 0);
 		return data;
 	}
